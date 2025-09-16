@@ -1,0 +1,253 @@
+<?php
+/**
+ * Wild Donkey Footer (Hyvä) – White / Black with Orange accents
+ * - 4 columns on desktop, 2 on tablet, 1 on mobile
+ * - CMS link groups (shop/help/company) + Newsletter block
+ * - Links + focus rings use brand orange (donkey.suggested: `sunset`)
+ * - Social icons switch to simple bordered pills with orange hover
+ * - A11y: labeled regions & focus styles
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Hyva\Theme\Model\ViewModelRegistry $viewModels
+ */
+
+declare(strict_types=1);
+
+use WildDonkey\Theme\ViewModel\FooterData;
+
+/** @var FooterData $footerData */
+$footerData = $viewModels->require(FooterData::class);
+
+// Child blocks
+$shopLinks     = (string) $block->getChildHtml('footer_links_shop');
+$helpLinks     = (string) $block->getChildHtml('footer_links_help');
+$companyLinks  = (string) $block->getChildHtml('footer_links_company');
+$newsletterTxt = (string) $block->getChildHtml('footer_newsletter_text');
+
+// Config-driven contacts
+$email   = $footerData->getStoreEmail();
+$phone   = $footerData->getStorePhone();
+$address = $footerData->getStoreAddress();
+
+$year    = $footerData->getCurrentYear();
+$baseUrl = $block->getUrl('');
+?>
+<footer class="bg-white text-black border-t border-neutral-200 mt-12 print:hidden" aria-label="Site footer">
+    <!-- Subtle top accent -->
+    <div class="h-1 bg-gradient-to-r from-neutral-200 via-neutral-100 to-transparent"></div>
+
+    <div class="container mx-auto px-4 py-12">
+        <!-- Top grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <!-- Brand / Newsletter -->
+            <section class="space-y-4" aria-labelledby="footer-brand">
+                <h2 id="footer-brand" class="sr-only">Wild Donkey Coffee</h2>
+
+                <a href="<?= $escaper->escapeUrl($baseUrl) ?>" class="inline-flex items-center gap-3">
+                    <span class="text-xl font-semibold tracking-wide">Wild Donkey Coffee</span>
+                    <span class="h-2 w-2 rounded-full bg-black/70"></span>
+                </a>
+
+                <p class="text-sm/6 text-neutral-700">
+                    Small-batch roasters. Big, vivid cups. Roasted weekly on Anglesey.
+                </p>
+
+                <?php if (trim($newsletterTxt) !== ''): ?>
+                    <div class="text-sm text-neutral-700">
+                        <?= /* @noEscape */ $newsletterTxt ?>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Newsletter form (style inner elements) -->
+                <div class="mt-2
+                            [&_input[type='email']]:w-full
+                            [&_input[type='email']]:rounded-xl
+                            [&_input[type='email']]:border
+                            [&_input[type='email']]:border-neutral-300
+                            [&_input[type='email']]:px-3
+                            [&_input[type='email']]:py-2
+                            [&_input[type='email']]:text-sm
+                            [&_input[type='email']]:placeholder-neutral-400
+                            [&_input[type='email']]:focus:outline-none
+                            [&_input[type='email']]:focus:ring-2
+                            [&_input[type='email']]:focus:ring-donkey-sunset/60
+                            [&_button]:mt-2
+                            [&_button]:inline-flex
+                            [&_button]:items-center
+                            [&_button]:justify-center
+                            [&_button]:rounded-xl
+                            [&_button]:px-4
+                            [&_button]:py-2.5
+                            [&_button]:text-sm
+                            [&_button]:font-medium
+                            [&_button]:text-white
+                            [&_button]:bg-donkey-sunset
+                            [&_button:hover]:bg-donkey-sunset/90
+                            [&_button]:shadow-sm
+                            [&_button]:focus:outline-none
+                            [&_button]:focus:ring-2
+                            [&_button]:focus:ring-donkey-sunset/60">
+                    <?= /* @noEscape */ $block->getChildHtml('footer_newsletter') ?>
+                </div>
+
+                <!-- Contacts -->
+                <div class="pt-4 text-sm space-y-1">
+                    <?php if ($phone): ?>
+                        <div>
+                            <span class="sr-only">Phone:</span>
+                            <a class="underline decoration-dotted hover:text-donkey-sunset focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60 rounded"
+                               href="tel:<?= $escaper->escapeHtmlAttr($phone) ?>">
+                                <?= $escaper->escapeHtml($phone) ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($email): ?>
+                        <div>
+                            <span class="sr-only">Email:</span>
+                            <a class="underline decoration-dotted hover:text-donkey-sunset focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60 rounded"
+                               href="mailto:<?= $escaper->escapeHtmlAttr($email) ?>">
+                                <?= $escaper->escapeHtml($email) ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($address): ?>
+                        <div class="text-neutral-700 mt-2"><?= $escaper->escapeHtml($address) ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Social -->
+                <nav aria-label="Social media" class="pt-4">
+                    <ul class="flex gap-3">
+                        <!-- Instagram -->
+                        <li>
+                            <a href="#"
+                               class="inline-flex p-2 rounded-lg border border-neutral-300 hover:border-donkey-sunset hover:text-donkey-sunset transition
+                                      focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60"
+                               aria-label="Instagram">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                     class="w-5 h-5 fill-current"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm0 2a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H7zm5 3a5 5 0 110 10 5 5 0 010-10zm0 2.2a2.8 2.8 0 100 5.6 2.8 2.8 0 000-5.6zM18 6.5a1 1 0 110 2 1 1 0 010-2z"/></svg>
+                            </a>
+                        </li>
+                        <!-- X / Twitter -->
+                        <li>
+                            <a href="#"
+                               class="inline-flex p-2 rounded-lg border border-neutral-300 hover:border-donkey-sunset hover:text-donkey-sunset transition
+                                      focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60"
+                               aria-label="X (Twitter)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                     class="w-5 h-5 fill-current"><path d="M3 3h3.8l5.2 6.9L18.3 3H21l-7 8.8 7.5 9.7h-3.8l-5.6-7.3L6 21H3l7.5-9.4L3 3z"/></svg>
+                            </a>
+                        </li>
+                        <!-- YouTube -->
+                        <li>
+                            <a href="#"
+                               class="inline-flex p-2 rounded-lg border border-neutral-300 hover:border-donkey-sunset hover:text-donkey-sunset transition
+                                      focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60"
+                               aria-label="YouTube">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                     class="w-5 h-5 fill-current"><path d="M23 7.5a4 4 0 00-2.8-2.9C18 4 12 4 12 4s-6 0-8.2.6A4 4 0 001 7.5 42.3 42.3 0 000 12a42.3 42.3 0 001 4.5 4 4 0 002.8 2.9C6 20 12 20 12 20s6 0 8.2-.6A4 4 0 0023 16.5 42.3 42.3 0 0024 12a42.3 42.3 0 00-1-4.5zM9.8 15.3V8.7L15.5 12l-5.7 3.3z"/></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </section>
+
+            <!-- Shop -->
+            <section aria-labelledby="footer-shop" class="hidden md:block">
+                <h2 id="footer-shop" class="text-sm font-semibold uppercase tracking-wider mb-3">Shop</h2>
+                <nav aria-label="Shop links"
+                     class="[&_a]:text-black [&_a:hover]:text-donkey-sunset [&_a]:underline [&_a]:decoration-dotted [&_a]:transition
+                            [&_a]:focus:outline-none [&_a]:focus:ring-2 [&_a]:focus:ring-donkey-sunset/60 [&_a]:rounded">
+                    <?= /* @noEscape */ $shopLinks ?>
+                </nav>
+            </section>
+
+            <!-- Help -->
+            <section aria-labelledby="footer-help" class="hidden md:block">
+                <h2 id="footer-help" class="text-sm font-semibold uppercase tracking-wider mb-3">Help</h2>
+                <nav aria-label="Help links"
+                     class="[&_a]:text-black [&_a:hover]:text-donkey-sunset [&_a]:underline [&_a]:decoration-dotted [&_a]:transition
+                            [&_a]:focus:outline-none [&_a]:focus:ring-2 [&_a]:focus:ring-donkey-sunset/60 [&_a]:rounded">
+                    <?= /* @noEscape */ $helpLinks ?>
+                </nav>
+            </section>
+
+            <!-- Company -->
+            <section aria-labelledby="footer-company" class="hidden md:block">
+                <h2 id="footer-company" class="text-sm font-semibold uppercase tracking-wider mb-3">Company</h2>
+                <nav aria-label="Company links"
+                     class="[&_a]:text-black [&_a:hover]:text-donkey-sunset [&_a]:underline [&_a]:decoration-dotted [&_a]:transition
+                            [&_a]:focus:outline-none [&_a]:focus:ring-2 [&_a]:focus:ring-donkey-sunset/60 [&_a]:rounded">
+                    <?= /* @noEscape */ $companyLinks ?>
+                </nav>
+            </section>
+
+            <!-- Mobile accordions -->
+            <div class="md:hidden space-y-2">
+                <details class="group border border-neutral-200 rounded-xl">
+                    <summary class="cursor-pointer px-4 py-3 flex justify-between items-center">
+                        <span class="text-sm font-semibold uppercase tracking-wider">Shop</span>
+                        <span class="text-xs opacity-80 group-open:rotate-180 transition">▲</span>
+                    </summary>
+                    <div class="px-4 pb-4
+                                [&_a]:block [&_a]:py-1
+                                [&_a]:text-black [&_a:hover]:text-donkey-sunset
+                                [&_a]:underline [&_a]:decoration-dotted
+                                [&_a]:focus:outline-none [&_a]:focus:ring-2 [&_a]:focus:ring-donkey-sunset/60 [&_a]:rounded">
+                        <?= /* @noEscape */ $shopLinks ?>
+                    </div>
+                </details>
+
+                <details class="group border border-neutral-200 rounded-xl">
+                    <summary class="cursor-pointer px-4 py-3 flex justify-between items-center">
+                        <span class="text-sm font-semibold uppercase tracking-wider">Help</span>
+                        <span class="text-xs opacity-80 group-open:rotate-180 transition">▲</span>
+                    </summary>
+                    <div class="px-4 pb-4
+                                [&_a]:block [&_a]:py-1
+                                [&_a]:text-black [&_a:hover]:text-donkey-sunset
+                                [&_a]:underline [&_a]:decoration-dotted
+                                [&_a]:focus:outline-none [&_a]:focus:ring-2 [&_a]:focus:ring-donkey-sunset/60 [&_a]:rounded">
+                        <?= /* @noEscape */ $helpLinks ?>
+                    </div>
+                </details>
+
+                <details class="group border border-neutral-200 rounded-xl">
+                    <summary class="cursor-pointer px-4 py-3 flex justify-between items-center">
+                        <span class="text-sm font-semibold uppercase tracking-wider">Company</span>
+                        <span class="text-xs opacity-80 group-open:rotate-180 transition">▲</span>
+                    </summary>
+                    <div class="px-4 pb-4
+                                [&_a]:block [&_a]:py-1
+                                [&_a]:text-black [&_a:hover]:text-donkey-sunset
+                                [&_a]:underline [&_a]:decoration-dotted
+                                [&_a]:focus:outline-none [&_a]:focus:ring-2 [&_a]:focus:ring-donkey-sunset/60 [&_a]:rounded">
+                        <?= /* @noEscape */ $companyLinks ?>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Payment badges -->
+        <div class="mt-10 flex flex-wrap items-center gap-3">
+            <span class="text-xs text-neutral-700">We accept</span>
+            <span class="px-2 py-1 border border-neutral-300 rounded text-sm">Visa</span>
+            <span class="px-2 py-1 border border-neutral-300 rounded text-sm">Mastercard</span>
+            <span class="px-2 py-1 border border-neutral-300 rounded text-sm">Amex</span>
+            <span class="px-2 py-1 border border-neutral-300 rounded text-sm">PayPal</span>
+        </div>
+    </div>
+
+    <!-- Legal bar -->
+    <div class="bg-white border-t border-neutral-200">
+        <div class="container mx-auto px-4 py-4 text-sm flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>© <?= $escaper->escapeHtml((string) $year) ?> Wild Donkey Coffee</div>
+            <nav aria-label="Legal" class="flex flex-wrap gap-4">
+                <a href="#" class="underline decoration-dotted hover:text-donkey-sunset focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60 rounded">Privacy</a>
+                <a href="#" class="underline decoration-dotted hover:text-donkey-sunset focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60 rounded">Terms</a>
+                <a href="#" class="underline decoration-dotted hover:text-donkey-sunset focus:outline-none focus:ring-2 focus:ring-donkey-sunset/60 rounded">Cookies</a>
+            </nav>
+        </div>
+    </div>
+</footer>

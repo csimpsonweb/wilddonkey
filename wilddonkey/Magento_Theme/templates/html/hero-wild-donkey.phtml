@@ -1,0 +1,73 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+$bg = $block->getViewFileUrl('images/cowboy-coffee.png'); // 1920×653
+?>
+<section class="relative isolate text-donkey-bone">
+
+    <!-- Ratio box (keeps 1920:653 at any width) -->
+    <div class="hero--ratio relative w-full mx-auto">
+
+        <!-- Background image -->
+        <img
+            src="<?= $escaper->escapeUrl($bg) ?>"
+            alt="Freshly roasted coffee beans"
+            class="absolute inset-0 w-full h-full object-cover"
+            loading="eager" decoding="async" fetchpriority="high"
+        />
+
+        <!-- Readability overlay -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/60"></div>
+
+        <!-- Content: vertically centered, left aligned -->
+        <div class="absolute inset-0 flex items-center">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl">
+                    <p class="uppercase tracking-[0.22em] text-xs md:text-sm text-white/85 mb-3">
+                        Small-batch Roasters
+                    </p>
+
+                    <h1 class="font-heading text-3xl md:text-6xl tracking-tight font-normal text-white mb-4">
+                        Slowly filtered through a cowboy's sock
+                    </h1>
+
+                    <p class="text-white/90 text-lg md:text-xl leading-relaxed max-w-xl">
+                        For people who care about their brew.
+                    </p>
+
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <a href="#shop"
+                           class="inline-flex items-center gap-2 rounded-xl px-6 py-3
+                      bg-donkey-sunset text-donkey-bone font-semibold shadow-soft
+                      hover:bg-[#d46f28] focus:outline-none focus:ring-2 focus:ring-white/70">
+                            Shop Coffee
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7M5 12h10"/>
+                            </svg>
+                        </a>
+
+                        <a href="#story"
+                           class="inline-flex items-center rounded-xl px-6 py-3
+                      border border-white/60 text-white/95 font-semibold
+                      hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/70">
+                            Our Story
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Aspect-ratio support -->
+<style>
+    @supports (aspect-ratio: 1 / 1) {
+        .hero--ratio { aspect-ratio: 1920 / 653; }
+    }
+    @supports not (aspect-ratio: 1 / 1) {
+        .hero--ratio { position: relative; }
+        .hero--ratio::before { content: ""; display: block; padding-top: 34.01%; } /* 653 / 1920 */
+    }
+</style>

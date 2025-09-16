@@ -1,0 +1,29 @@
+<?php
+/**
+ * Hyvä-styled Newsletter Subscribe Form
+ *
+ * @var \Magento\Newsletter\Block\Subscribe $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+declare(strict_types=1);
+$actionUrl = $block->getFormActionUrl();
+?>
+<form class="space-y-3" action="<?= $escaper->escapeUrl($actionUrl) ?>" method="post" id="newsletter-validate-detail">
+    <?= /* @noEscape */ $block->getBlockHtml('formkey') ?>
+    <label for="footer-newsletter" class="sr-only"><?= $escaper->escapeHtml(__('Your email address')) ?></label>
+    <div class="flex items-stretch gap-2">
+        <input
+            name="email"
+            id="footer-newsletter"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder="<?= $escaper->escapeHtmlAttr(__('you@example.com')) ?>"
+            class="w-full rounded-xl bg-white/10 text-donkey-bone placeholder-white/60 border border-white/20 px-4 py-2 focus:outline-none focus:ring focus:ring-donkey-cactus"/>
+        <button type="submit"
+                class="rounded-xl px-4 py-2 bg-donkey-cactus text-black font-medium hover:opacity-90 focus:outline-none focus:ring focus:ring-donkey-cactus">
+            <?= $escaper->escapeHtml(__('Subscribe')) ?>
+        </button>
+    </div>
+    <p class="text-xs text-donkey-sand"><?= $escaper->escapeHtml(__('We send only good stuff. Unsubscribe anytime.')) ?></p>
+</form>

@@ -1,0 +1,313 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\Escaper $escaper */
+/** @var \Hyva\Theme\Model\ViewModelRegistry $viewModels */
+
+use Magento\Checkout\Block\Cart\Sidebar as SidebarCart;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
+use Hyva\Theme\ViewModel\StoreConfig;
+
+$heroicons     = $viewModels->require(HeroiconsOutline::class);
+$storeConfig   = $viewModels->require(StoreConfig::class);
+$showMiniCart  = $storeConfig->getStoreConfig(SidebarCart::XML_PATH_CHECKOUT_SIDEBAR_DISPLAY);
+?>
+<script>
+    function initHeader () {
+        return {
+            searchOpen: false,
+            mobileOpen: false,
+            cart: {},
+            isCartOpen: false,
+            getData(data) { if (data.cart) this.cart = data.cart; },
+            isCartEmpty() { return !this.cart.summary_count; },
+            toggleCart(event) {
+                if (event.detail && event.detail.isOpen !== undefined) {
+                    this.isCartOpen = event.detail.isOpen;
+                    if (!this.isCartOpen && this.$refs?.cartButton) this.$refs.cartButton.focus();
+                } else {
+                    this.isCartOpen = true;
+                }
+            }
+        }
+    }
+    function initCompareHeader() {
+        return {
+            compareProducts: null,
+            itemCount: 0,
+            receiveCompareData(data) {
+                if (data['compare-products']) {
+                    this.compareProducts = data['compare-products'];
+                    this.itemCount = this.compareProducts.count;
+                }
+            }
+        }
+    }
+</script>
+
+<header x-data="initHeader()"
+        @private-content-loaded.window="getData(event.detail.data)"
+        class="z-30 bg-black text-donkey-bone border-b border-black/10 shadow-brand relative"
+        style="--color-primary:#E4672B;"><!-- CHANGE: make Hyvä `primary` = brand orange -->
+
+    <!-- Announcement Bar -->
+    <!--    <div class="bg-donkey-parchment text-donkey-bean text-center py-2.5">-->
+    <!--        <p class="font-accent text-base md:text-lg font-semibold tracking-wide">-->
+    <!--            Small-batch Roasters-->
+    <!--        </p>-->
+    <!--    </div>-->
+
+    <!-- Main Header -->
+    <div class="container mx-auto flex justify-between items-center px-4 lg:px-6 py-4 lg:py-6">
+        <!-- Logo -->
+        <div class="flex items-center">
+            <a href="<?= $escaper->escapeUrl($block->getUrl('')) ?>" class="group inline-flex items-baseline gap-2">
+
+                <span class="font-heading text-2xl md:text-3xl tracking-wide text-donkey-bone">
+                    WILD DONKEY COFFEE CO
+                </span>
+                <span class="hidden md:inline-block h-2 w-2 rounded-full bg-donkey-bone/80 group-hover:bg-donkey-bone transition"></span>
+            </a>
+        </div>
+
+        <!-- Mobile Toggle -->
+        <button @click="mobileOpen = !mobileOpen"
+                class="md:hidden p-3 rounded-xl bg-black/10 text-donkey-bone hover:bg-black/20 transition
+                       focus:outline-none focus:ring-2 focus:ring-donkey-bone/70"
+                aria-label="Toggle navigation">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8 group/nav">
+            <!-- Style topmenu anchors without touching template -->
+            <div class="flex gap-8 font-body font-medium
+                        [&_a]:text-donkey-bone/95
+                        [&_a:hover]:text-white
+                        [&_a]:transition
+                        [&_a]:no-underline
+                        [&_li]:relative
+                        [&_a.active]:text-white
+                        [&_a]:rounded
+                        [&_a:focus-visible]:outline-none
+                        [&_a:focus-visible]:ring-2
+                        [&_a:focus-visible]:ring-[color:var(--color-primary)]"><!-- CHANGE: orange focus ring -->
+                <?= $block->getChildHtml('topmenu'); ?>
+            </div>
+        </nav>
+
+        <!-- Header Actions -->
+        <div class="hidden md:flex items-center gap-3">
+            <!-- Compare -->
+            <a id="compare-link"
+               class="relative inline-flex items-center justify-center w-12 h-12 rounded-xl
+                      bg-black/10 text-donkey-bone hover:bg-black/20 transition shadow-md invisible
+                      focus:outline-none focus:ring-2 focus:ring-donkey-bone/70"
+               :class="{ 'invisible': !(itemCount > 0) }"
+               href="<?= $escaper->escapeUrl($block->getUrl('catalog/product_compare/index')) ?>"
+               title="<?= $escaper->escapeHtmlAttr(__('Compare Products')) ?>"
+               x-data="initCompareHeader()"
+               @private-content-loaded.window="receiveCompareData($event.detail.data)"
+               :aria-label="`
+                   <?= $escaper->escapeHtmlAttr(__('Compare Products')) ?>,
+                   ${itemCount > 1
+                       ? hyva.str('<?= $escaper->escapeJs(__('%1 Items')) ?>', itemCount)
+                       : hyva.str('<?= $escaper->escapeJs(__('%1 Item')) ?>', itemCount)
+                   }`">
+                <?= $heroicons->scaleHtml("w-5 h-5", 20, 20, ["aria-hidden" => "true"]) ?>
+                <span x-text="itemCount"
+                      class="absolute -top-2 -right-2 h-5 min-w-5 px-1 rounded-full text-[11px] font-bold
+                             bg-donkey-sunset text-donkey-bone flex items-center justify-center"
+                      aria-hidden="true"></span>
+            </a>
+
+            <!-- Search -->
+            <button id="menu-search-icon"
+                    class="inline-flex items-center justify-center w-12 h-12 rounded-xl
+                           bg-black/10 text-donkey-bone hover:bg-black/20 transition shadow-md
+                           focus:outline-none focus:ring-2 focus:ring-donkey-bone/70"
+                    @click.prevent="searchOpen = !searchOpen; $dispatch('search-open');"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Toggle search form')) ?>"
+                    aria-haspopup="true"
+                    :aria-expanded="searchOpen"
+                    x-ref="searchButton">
+                <?= $heroicons->searchHtml("w-5 h-5", 20, 20, ["aria-hidden" => "true"]) ?>
+            </button>
+
+            <!-- Additional slots -->
+            <div class="flex items-center gap-3">
+                <?= $block->getChildHtml('additional') ?>
+            </div>
+
+            <!-- Customer -->
+            <div class="customer-menu flex items-center
+                        [&_a]:inline-flex [&_a]:items-center [&_a]:justify-center
+                        [&_a]:w-12 [&_a]:h-12 [&_a]:rounded-xl
+                        [&_a]:bg-black/10 [&_a]:text-donkey-bone
+                        [&_a:hover]:bg-black/20
+                        [&_a]:transition
+                        [&_button]:inline-flex [&_button]:items-center [&_button]:justify-center
+                        [&_button]:w-12 [&_button]:h-12 [&_button]:rounded-xl
+                        [&_button]:bg-black/10 [&_button]:text-donkey-bone
+                        [&_button:hover]:bg-black/20">
+                <?= $block->getChildHtml('customer') ?>
+            </div>
+
+            <!-- Cart -->
+            <?php if ($showMiniCart): ?>
+                <button
+            <?php else: ?>
+            <a
+                <?php endif ?>
+                id="menu-cart-icon"
+                class="relative inline-flex items-center justify-center w-12 h-12 rounded-xl
+                       bg-donkey-sunset text-donkey-bone hover:bg-[#d46f28] transition shadow-md
+                       focus:outline-none focus:ring-2 focus:ring-donkey-bone/70"
+                x-ref="cartButton"
+                :aria-disabled="isCartEmpty()"
+                :aria-label="`
+                        <?= $escaper->escapeHtmlAttr($showMiniCart ? __('Toggle minicart') : __('View cart')) ?>,
+                        ${isCartEmpty()
+                            ? '<?= $escaper->escapeHtmlAttr(__('Cart is empty')) ?>'
+                            : cart.summary_count > 1
+                                ? hyva.str('<?= $escaper->escapeHtmlAttr(__('%1 items')) ?>', cart.summary_count)
+                                : hyva.str('<?= $escaper->escapeHtmlAttr(__('%1 item')) ?>', cart.summary_count)
+                        }`"
+                <?php if ($showMiniCart): ?>
+                    @click.prevent="$dispatch('toggle-cart', { isOpen: true })"
+                    @toggle-cart.window="toggleCart($event)"
+                    :aria-expanded="isCartOpen"
+                    aria-haspopup="dialog"
+                <?php else: ?>
+                    href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/index')) ?>"
+                    title="<?= $escaper->escapeHtmlAttr(__('View cart')) ?>"
+                <?php endif ?>>
+                <?= $heroicons->shoppingCartHtml("w-5 h-5", 20, 20, ["aria-hidden" => "true"]) ?>
+                <span x-text="cart.summary_count"
+                      x-show="!isCartEmpty()"
+                      x-cloak
+                      class="absolute -top-2 -right-2 h-5 min-w-5 px-1 rounded-full text-[11px] font-bold
+                             bg-black/30 text-donkey-bone border border-donkey-bone/60
+                             flex items-center justify-center"
+                      aria-hidden="true"></span>
+                <?php if ($showMiniCart): ?>
+                    </button>
+                <?php else: ?>
+            </a>
+        <?php endif ?>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div x-show="mobileOpen"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 transform -translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform -translate-y-2"
+         class="md:hidden shadow-lg bg-donkey-bone border-t border-donkey-crema/40">
+        <nav class="px-6 py-6 space-y-2 font-body text-donkey-bean
+                    [&_a]:block [&_a]:py-3 [&_a]:px-4 [&_a]:rounded-xl
+                    [&_a:hover]:bg-donkey-parchment">
+            <?= $block->getChildHtml('topmenu'); ?>
+        </nav>
+
+        <!-- Mobile Actions -->
+        <div class="px-6 py-4 flex justify-center gap-6 border-t border-donkey-crema/40 bg-donkey-parchment">
+            <!-- Compare -->
+            <a id="mobile-compare-link"
+               class="relative inline-flex items-center justify-center w-14 h-14 rounded-xl
+                      bg-black/10 text-donkey-bean hover:bg-black/20 transition shadow-md invisible
+                      focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
+               :class="{ 'invisible': !(itemCount > 0) }"
+               href="<?= $escaper->escapeUrl($block->getUrl('catalog/product_compare/index')) ?>"
+               title="<?= $escaper->escapeHtmlAttr(__('Compare Products')) ?>"
+               x-data="initCompareHeader()"
+               @private-content-loaded.window="receiveCompareData($event.detail.data)">
+                <?= $heroicons->scaleHtml("w-6 h-6", 24, 24, ["aria-hidden" => "true"]) ?>
+                <span x-text="itemCount"
+                      class="absolute -top-2 -right-2 h-5 min-w-5 px-1 rounded-full text-[11px] font-bold
+                             bg-donkey-sunset text-donkey-bone flex items-center justify-center"
+                      aria-hidden="true"></span>
+            </a>
+
+            <!-- Search -->
+            <button class="inline-flex items-center justify-center w-14 h-14 rounded-xl
+                           bg-black/10 text-donkey-bean hover:bg-black/20 transition shadow-md
+                           focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
+                    @click.prevent="searchOpen = !searchOpen; $dispatch('search-open');">
+                <?= $heroicons->searchHtml("w-6 h-6", 24, 24, ["aria-hidden" => "true"]) ?>
+            </button>
+
+            <!-- Customer -->
+            <div class="customer-menu flex items-center
+                        [&_a]:inline-flex [&_a]:items-center [&_a]:justify-center
+                        [&_a]:w-14 [&_a]:h-14 [&_a]:rounded-xl
+                        [&_a]:bg-black/10 [&_a]:text-donkey-bean
+                        [&_a:hover]:bg-black/20">
+                <?= $block->getChildHtml('customer') ?>
+            </div>
+
+            <!-- Cart -->
+            <?php if ($showMiniCart): ?>
+                <button
+            <?php else: ?>
+            <a
+                <?php endif ?>
+                class="relative inline-flex items-center justify-center w-14 h-14 rounded-xl
+                       bg-donkey-sunset text-donkey-bone hover:bg-[#d46f28] transition shadow-md
+                       focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
+                <?php if ($showMiniCart): ?>
+                    @click.prevent="$dispatch('toggle-cart', { isOpen: true })"
+                    @toggle-cart.window="toggleCart($event)"
+                <?php else: ?>
+                    href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/index')) ?>"
+                <?php endif ?>>
+                <?= $heroicons->shoppingCartHtml("w-6 h-6", 24, 24, ["aria-hidden" => "true"]) ?>
+                <span x-text="cart.summary_count"
+                      x-show="!isCartEmpty()"
+                      x-cloak
+                      class="absolute -top-2 -right-2 h-5 min-w-5 px-1 rounded-full text-[11px] font-bold
+                             bg-black/20 text-donkey-bone border border-donkey-bone/50
+                             flex items-center justify-center"
+                      aria-hidden="true"></span>
+                <?php if ($showMiniCart): ?>
+                    </button>
+                <?php else: ?>
+            </a>
+        <?php endif ?>
+        </div>
+    </div>
+
+    <!-- Search Dropdown -->
+    <div class="absolute z-20 w-full shadow-xl bg-donkey-bone border-t border-donkey-bandana/30"
+         id="search-content"
+         x-cloak x-show="searchOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 transform -translate-y-4"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform -translate-y-4"
+         @click.outside="searchOpen = false"
+         @keydown.escape="searchOpen = false; $refs.searchButton.focus();">
+        <div class="container mx-auto px-4 py-6">
+            <?= $block->getChildHtml('header-search'); ?>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <?= $block->getChildHtml('cart-drawer'); ?>
+
+    <!-- Authentication Pop-Up -->
+    <?= $block->getChildHtml('authentication-popup'); ?>
+</header>
+
+<style>
+    /* Tiny polish only */
+    header.shadow-brand { box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+</style>

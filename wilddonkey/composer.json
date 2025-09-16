@@ -1,0 +1,9 @@
+{
+    "name": "wilddonkey/theme",
+    "description": "Hyvä child theme for Wild Donkey Coffee",
+    "type": "magento2-theme",
+    "version": "1.0.0",
+    "require": {
+        "hyva-themes/magento2-default-theme": "*"
+    }
+}

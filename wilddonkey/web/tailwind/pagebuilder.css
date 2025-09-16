@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Components used in Page Builder */
+@layer components {
+    .btn-primary { @apply bg-wildflow-espresso text-white px-6 py-3 rounded-lg font-body font-medium hover:bg-wildflow-bark; }
+    .btn-secondary { @apply bg-wildflow-caramel text-white px-6 py-3 rounded-lg font-body font-medium hover:bg-wildflow-wildflower; }
+    .card { @apply bg-white rounded-xl shadow-lg overflow-hidden border border-wildflow-cream; }
+    .h1 { @apply font-heading text-5xl font-bold text-wildflow-espresso; }
+    .h2 { @apply font-heading text-3xl font-semibold text-wildflow-bark; }
+    .lead { @apply font-body text-lg text-wildflow-stone; }
+}

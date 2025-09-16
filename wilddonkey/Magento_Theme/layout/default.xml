@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- Inject children into Hyvä's footer content area -->
+        <referenceBlock name="footer-content">
+            <block class="Magento\Cms\Block\Block" name="wilddonkey.footer.links.shop" as="footer_links_shop">
+                <arguments><argument name="block_id" xsi:type="string">footer_links_shop</argument></arguments>
+            </block>
+            <block class="Magento\Cms\Block\Block" name="wilddonkey.footer.links.help" as="footer_links_help">
+                <arguments><argument name="block_id" xsi:type="string">footer_links_help</argument></arguments>
+            </block>
+            <block class="Magento\Cms\Block\Block" name="wilddonkey.footer.links.company" as="footer_links_company">
+                <arguments><argument name="block_id" xsi:type="string">footer_links_company</argument></arguments>
+            </block>
+            <block class="Magento\Cms\Block\Block" name="wilddonkey.footer.newsletter.text" as="footer_newsletter_text">
+                <arguments><argument name="block_id" xsi:type="string">footer_newsletter_text</argument></arguments>
+            </block>
+            <block class="Magento\Newsletter\Block\Subscribe"
+                   name="wilddonkey.footer.newsletter"
+                   as="footer_newsletter"
+                   template="Magento_Newsletter::subscribe.phtml"/>
+        </referenceBlock>
+    </body>
+</page>
