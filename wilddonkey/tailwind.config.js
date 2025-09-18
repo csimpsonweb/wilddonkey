@@ -2,6 +2,7 @@ const path = require('path');
 const plugin = require('tailwindcss/plugin');
 
 module.exports = {
+    mode: 'jit', // Enable Just-In-Time mode for optimal purging
     content: [
         './**/*.phtml',
         './**/*.html',

@@ -4,12 +4,15 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "tailwindcss -i ./web/tailwind/tailwind.css -o ./web/tailwind/styles.css --watch",
-    "build": "TAILWIND_MODE=build tailwindcss -i ./web/tailwind/tailwind.css -o ./web/tailwind/styles.css --minify"
+    "build": "NODE_ENV=production tailwindcss -i ./web/tailwind/tailwind.css -o ./web/tailwind/styles.css --minify",
+    "analyze": "npx tailwindcss -i ./web/tailwind/tailwind.css -o ./web/tailwind/styles.css --minify --verbose"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.15",
     "autoprefixer": "^10.4.20",
+    "cssnano": "^7.0.5",
     "postcss": "^8.4.41",
+    "postcss-combine-duplicated-selectors": "^10.0.3",
     "tailwindcss": "^3.4.10"
   }
 }
