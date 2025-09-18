@@ -15,7 +15,6 @@ $showMiniCart  = $storeConfig->getStoreConfig(SidebarCart::XML_PATH_CHECKOUT_SID
     function initHeader () {
         return {
             searchOpen: false,
-            mobileOpen: false,
             cart: {},
             isCartOpen: false,
             getData(data) { if (data.cart) this.cart = data.cart; },
@@ -69,19 +68,13 @@ $showMiniCart  = $storeConfig->getStoreConfig(SidebarCart::XML_PATH_CHECKOUT_SID
             </a>
         </div>
 
-        <!-- Mobile Toggle -->
-        <button @click="mobileOpen = !mobileOpen"
-                class="md:hidden p-3 rounded-xl bg-black/10 text-donkey-bone hover:bg-black/20 transition
-                       focus:outline-none focus:ring-2 focus:ring-donkey-bone/70"
-                aria-label="Toggle navigation">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
+        <!-- Mobile Menu Toggle (show on mobile and tablet) -->
+        <div class="lg:hidden">
+            <?= $block->getChildHtml('topmenu.mobile'); ?>
+        </div>
 
-        <!-- Desktop Navigation -->
-        <nav class="hidden md:flex items-center gap-8 group/nav">
+        <!-- Desktop Navigation (show on desktop) -->
+        <nav class="hidden lg:flex items-center gap-8 group/nav">
             <!-- Style topmenu anchors without touching template -->
             <div class="flex gap-8 font-body font-medium
                         [&_a]:text-donkey-bone/95
@@ -98,8 +91,8 @@ $showMiniCart  = $storeConfig->getStoreConfig(SidebarCart::XML_PATH_CHECKOUT_SID
             </div>
         </nav>
 
-        <!-- Header Actions -->
-        <div class="hidden md:flex items-center gap-3">
+        <!-- Header Actions (show on desktop) -->
+        <div class="hidden lg:flex items-center gap-3">
             <!-- Compare -->
             <a id="compare-link"
                class="relative inline-flex items-center justify-center w-12 h-12 rounded-xl
@@ -200,88 +193,6 @@ $showMiniCart  = $storeConfig->getStoreConfig(SidebarCart::XML_PATH_CHECKOUT_SID
         </div>
     </div>
 
-    <!-- Mobile Navigation -->
-    <div x-show="mobileOpen"
-         x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 transform -translate-y-2"
-         x-transition:enter-end="opacity-100 transform translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 transform translate-y-0"
-         x-transition:leave-end="opacity-0 transform -translate-y-2"
-         class="md:hidden shadow-lg bg-donkey-bone border-t border-donkey-crema/40">
-        <nav class="px-6 py-6 space-y-2 font-body text-donkey-bean
-                    [&_a]:block [&_a]:py-3 [&_a]:px-4 [&_a]:rounded-xl
-                    [&_a:hover]:bg-donkey-parchment">
-            <?= $block->getChildHtml('topmenu'); ?>
-        </nav>
-
-        <!-- Mobile Actions -->
-        <div class="px-6 py-4 flex justify-center gap-6 border-t border-donkey-crema/40 bg-donkey-parchment">
-            <!-- Compare -->
-            <a id="mobile-compare-link"
-               class="relative inline-flex items-center justify-center w-14 h-14 rounded-xl
-                      bg-black/10 text-donkey-bean hover:bg-black/20 transition shadow-md invisible
-                      focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
-               :class="{ 'invisible': !(itemCount > 0) }"
-               href="<?= $escaper->escapeUrl($block->getUrl('catalog/product_compare/index')) ?>"
-               title="<?= $escaper->escapeHtmlAttr(__('Compare Products')) ?>"
-               x-data="initCompareHeader()"
-               @private-content-loaded.window="receiveCompareData($event.detail.data)">
-                <?= $heroicons->scaleHtml("w-6 h-6", 24, 24, ["aria-hidden" => "true"]) ?>
-                <span x-text="itemCount"
-                      class="absolute -top-2 -right-2 h-5 min-w-5 px-1 rounded-full text-[11px] font-bold
-                             bg-donkey-sunset text-donkey-bone flex items-center justify-center"
-                      aria-hidden="true"></span>
-            </a>
-
-            <!-- Search -->
-            <button class="inline-flex items-center justify-center w-14 h-14 rounded-xl
-                           bg-black/10 text-donkey-bean hover:bg-black/20 transition shadow-md
-                           focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
-                    @click.prevent="searchOpen = !searchOpen; $dispatch('search-open');">
-                <?= $heroicons->searchHtml("w-6 h-6", 24, 24, ["aria-hidden" => "true"]) ?>
-            </button>
-
-            <!-- Customer -->
-            <div class="customer-menu flex items-center
-                        [&_a]:inline-flex [&_a]:items-center [&_a]:justify-center
-                        [&_a]:w-14 [&_a]:h-14 [&_a]:rounded-xl
-                        [&_a]:bg-black/10 [&_a]:text-donkey-bean
-                        [&_a:hover]:bg-black/20">
-                <?= $block->getChildHtml('customer') ?>
-            </div>
-
-            <!-- Cart -->
-            <?php if ($showMiniCart): ?>
-                <button
-            <?php else: ?>
-            <a
-                <?php endif ?>
-                class="relative inline-flex items-center justify-center w-14 h-14 rounded-xl
-                       bg-donkey-sunset text-donkey-bone hover:bg-[#d46f28] transition shadow-md
-                       focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
-                <?php if ($showMiniCart): ?>
-                    @click.prevent="$dispatch('toggle-cart', { isOpen: true })"
-                    @toggle-cart.window="toggleCart($event)"
-                <?php else: ?>
-                    href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/index')) ?>"
-                <?php endif ?>>
-                <?= $heroicons->shoppingCartHtml("w-6 h-6", 24, 24, ["aria-hidden" => "true"]) ?>
-                <span x-text="cart.summary_count"
-                      x-show="!isCartEmpty()"
-                      x-cloak
-                      class="absolute -top-2 -right-2 h-5 min-w-5 px-1 rounded-full text-[11px] font-bold
-                             bg-black/20 text-donkey-bone border border-donkey-bone/50
-                             flex items-center justify-center"
-                      aria-hidden="true"></span>
-                <?php if ($showMiniCart): ?>
-                    </button>
-                <?php else: ?>
-            </a>
-        <?php endif ?>
-        </div>
-    </div>
 
     <!-- Search Dropdown -->
     <div class="absolute z-20 w-full shadow-xl bg-donkey-bone border-t border-donkey-bandana/30"

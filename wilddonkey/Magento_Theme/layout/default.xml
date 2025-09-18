@@ -2,6 +2,18 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
+        <!-- Configure topmenu with mobile and desktop menu blocks -->
+        <referenceBlock name="header-content">
+            <!-- Add mobile menu block -->
+            <block class="Magento\Framework\View\Element\Template"
+                   name="topmenu.mobile"
+                   template="Magento_Theme::html/header/menu/mobile.phtml"/>
+
+            <referenceBlock name="topmenu_generic">
+                <!-- Mobile and desktop menu blocks are now both available -->
+            </referenceBlock>
+        </referenceBlock>
+
         <!-- Inject children into Hyvä's footer content area -->
         <referenceBlock name="footer-content">
             <block class="Magento\Cms\Block\Block" name="wilddonkey.footer.links.shop" as="footer_links_shop">

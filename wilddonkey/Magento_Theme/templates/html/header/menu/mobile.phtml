@@ -1,0 +1,307 @@
+<?php
+/**
+ * Custom mobile menu template for WildDonkey theme
+ * Based on Hyva mobile menu with custom styling
+ */
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
+use Hyva\Theme\ViewModel\Navigation;
+use Hyva\Theme\ViewModel\StoreConfig;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+use Magento\Checkout\Block\Cart\Sidebar as SidebarCart;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+
+/** @var HeroiconsOutline $heroicons */
+$heroicons = $viewModels->require(HeroiconsOutline::class);
+
+/** @var Navigation $viewModelNavigation */
+$viewModelNavigation = $viewModels->require(Navigation::class, $block);
+
+/** @var StoreConfig $storeConfig */
+$storeConfig = $viewModels->require(StoreConfig::class);
+$showMiniCart = $storeConfig->getStoreConfig(SidebarCart::XML_PATH_CHECKOUT_SIDEBAR_DISPLAY);
+
+$uniqueId = '_' . uniqid();
+
+// Order is important here: 1. build the menu data, 2. then set the cache tags from the view model identities
+$menuItems = $viewModelNavigation->getNavigation(4);
+$block->setData('cache_tags', $viewModelNavigation->getIdentities());
+
+?>
+<nav
+    x-data="initMenuMobile<?= $escaper->escapeHtml($uniqueId) ?>()"
+    @keydown.window.escape="closeMenu()"
+    class="z-20 navigation lg:hidden"
+    aria-label="<?= $escaper->escapeHtmlAttr(__('Site navigation')) ?>"
+    role="navigation"
+>
+    <!-- Mobile menu trigger button -->
+    <button
+        x-ref="mobileMenuTrigger"
+        @click="openMenu()"
+        :class="{'overflow-x-hidden overflow-y-auto fixed top-0 left-0 w-full' : open}"
+        type="button"
+        class="p-3 rounded-xl bg-black/10 text-donkey-bone hover:bg-black/20 transition
+               focus:outline-none focus:ring-2 focus:ring-donkey-bone/70"
+        aria-label="<?= $escaper->escapeHtmlAttr(__('Open menu')) ?>"
+        aria-haspopup="menu"
+        :aria-expanded="open"
+        :hidden="open"
+    >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Mobile menu overlay and content -->
+    <div
+        x-ref="mobileMenuNavLinks"
+        class="
+            fixed top-0 right-0 w-full h-full p-1 hidden z-50
+            flex-col bg-donkey-bone shadow-2xl
+            overflow-y-auto overflow-x-hidden
+        "
+        :class="{ 'flex': open, 'hidden': !open }"
+        :aria-hidden="open ? 'false' : 'true'"
+        role="dialog"
+        aria-modal="true"
+    >
+        <!-- Mobile menu header -->
+        <div class="flex items-center justify-between p-6 border-b border-donkey-crema/40 bg-donkey-parchment">
+            <span class="font-heading text-xl text-donkey-bean">Menu</span>
+            <button
+                @click="closeMenu()"
+                class="inline-flex items-center justify-center w-10 h-10 rounded-xl
+                       bg-black/10 text-donkey-bean hover:bg-black/20 transition
+                       focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
+                aria-label="<?= $escaper->escapeHtmlAttr(__('Close menu')) ?>"
+                type="button"
+            >
+                <?= $heroicons->xHtml('w-5 h-5', 20, 20, ["aria-hidden" => "true"]) ?>
+            </button>
+        </div>
+
+        <!-- Navigation links -->
+        <ul
+            class="flex flex-col gap-y-1 p-6"
+            aria-label="<?= $escaper->escapeHtmlAttr(__('Site navigation links')) ?>"
+        >
+            <?php foreach ($menuItems as $index => $menuItem): ?>
+                <li
+                    data-child-id="<?= $escaper->escapeHtmLAttr($index) ?>-main"
+                    class="level-0"
+                >
+                    <div
+                        class="flex items-center transition-transform duration-150 ease-in-out transform"
+                        :class="{
+                            '-translate-x-full' : mobilePanelActiveId,
+                            'translate-x-0' : !mobilePanelActiveId
+                        }"
+                    >
+                        <a
+                            class="flex items-center w-full py-4 px-4 rounded-xl border-b border-donkey-crema/40 cursor-pointer
+                                bg-donkey-bone text-donkey-bean hover:bg-donkey-parchment transition level-0 font-body font-medium
+                            "
+                            href="<?= $escaper->escapeUrl($menuItem['url']) ?>"
+                            title="<?= $escaper->escapeHtmlAttr($menuItem['name']) ?>"
+                        >
+                            <?= $escaper->escapeHtml($menuItem['name']) ?>
+                        </a>
+                        <?php if (!empty($menuItem['childData'])): ?>
+                            <button
+                                @click="openSubcategory('<?= /* @noEscape */ $index ?>')"
+                                class="absolute right-4 flex items-center justify-center w-10 h-10 cursor-pointer
+                                bg-black/10 text-donkey-bean hover:bg-black/20 rounded-xl transition"
+                                aria-label="<?= $escaper->escapeHtmlAttr(__('Open %1 subcategories', $menuItem['name'])) ?>"
+                                aria-haspopup="true"
+                                :aria-expanded="mobilePanelActiveId === '<?= /* @noEscape */ (string) $index ?>'"
+                            >
+                                <?= $heroicons->chevronRightHtml('w-5 h-5', 20, 20, ["aria-hidden" => "true"]) ?>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                    <?php if (!empty($menuItem['childData'])): ?>
+                        <div
+                            data-child-id="<?= $escaper->escapeHtmLAttr($index) ?>"
+                            class="absolute top-0 right-0 z-10 flex flex-col gap-1 w-full h-full p-1 bg-donkey-bone"
+                            :class="{
+                                'hidden': mobilePanelActiveId !== '<?= /* @noEscape */ (string) $index ?>'
+                            }"
+                        >
+                            <!-- Subcategory header -->
+                            <div class="flex items-center justify-between p-6 border-b border-donkey-crema/40 bg-donkey-parchment">
+                                <button
+                                    type="button"
+                                    class="flex items-center text-donkey-bean font-heading text-lg"
+                                    @click="backToMainCategories('<?= /* @noEscape */ $index ?>-main')"
+                                    aria-label="<?= $escaper->escapeHtmlAttr(__('Back to main categories')) ?>"
+                                >
+                                    <?= $heroicons->chevronLeftHtml('w-5 h-5 mr-2', 20, 20, ["aria-hidden" => "true"]); ?>
+                                    <?= $escaper->escapeHtml($menuItem['name']) ?>
+                                </button>
+                                <button
+                                    @click="closeMenu()"
+                                    class="inline-flex items-center justify-center w-10 h-10 rounded-xl
+                                           bg-black/10 text-donkey-bean hover:bg-black/20 transition
+                                           focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
+                                    aria-label="<?= $escaper->escapeHtmlAttr(__('Close menu')) ?>"
+                                >
+                                    <?= $heroicons->xHtml('w-5 h-5', 20, 20, ["aria-hidden" => "true"]) ?>
+                                </button>
+                            </div>
+
+                            <ul
+                                class="p-6 transition-transform duration-200 ease-in-out translate-x-full transform"
+                                :class="{
+                                    'translate-x-full' : mobilePanelActiveId !== '<?= /* @noEscape */ (string) $index ?>',
+                                    'translate-x-0' : mobilePanelActiveId === '<?= /* @noEscape */ (string) $index ?>',
+                                }"
+                                aria-label="<?= $escaper->escapeHtmlAttr(__('Subcategories')) ?>"
+                            >
+                                <li>
+                                    <a
+                                        href="<?= $escaper->escapeUrl($menuItem['url']) ?>"
+                                        title="<?= $escaper->escapeHtmlAttr($menuItem['name']) ?>"
+                                        class="flex items-center w-full py-4 px-4 rounded-xl border-b border-donkey-crema/40 cursor-pointer
+                                            bg-donkey-bone text-donkey-bean hover:bg-donkey-parchment transition font-body font-semibold
+                                        "
+                                    >
+                                        <?= $escaper->escapeHtml(__('View All %1', $menuItem['name'])) ?>
+                                    </a>
+                                </li>
+                                <?php foreach ($menuItem['childData'] as $subMenuItem): ?>
+                                    <li>
+                                        <a
+                                            href="<?= $escaper->escapeUrl($subMenuItem['url']) ?>"
+                                            title="<?= $escaper->escapeHtmlAttr($subMenuItem['name']) ?>"
+                                            class="flex items-center w-full py-4 px-4 pl-8 rounded-xl border-b border-donkey-crema/40 cursor-pointer
+                                                bg-donkey-bone text-donkey-bean hover:bg-donkey-parchment transition font-body
+                                            "
+                                        >
+                                            <?= $escaper->escapeHtml($subMenuItem['name']) ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+
+        <!-- Mobile actions footer -->
+        <div class="mt-auto px-6 py-4 flex justify-center gap-4 border-t border-donkey-crema/40 bg-donkey-parchment">
+            <!-- Search -->
+            <button class="inline-flex items-center justify-center w-12 h-12 rounded-xl
+                           bg-black/10 text-donkey-bean hover:bg-black/20 transition shadow-md
+                           focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
+                    @click.prevent="closeMenu(); $dispatch('search-open');"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Search')) ?>">
+                <?= $heroicons->searchHtml("w-5 h-5", 20, 20, ["aria-hidden" => "true"]) ?>
+            </button>
+
+            <!-- Customer -->
+            <div class="customer-menu
+                        [&_a]:inline-flex [&_a]:items-center [&_a]:justify-center
+                        [&_a]:w-12 [&_a]:h-12 [&_a]:rounded-xl
+                        [&_a]:bg-black/10 [&_a]:text-donkey-bean
+                        [&_a:hover]:bg-black/20 [&_a]:transition [&_a]:shadow-md
+                        [&_button]:inline-flex [&_button]:items-center [&_button]:justify-center
+                        [&_button]:w-12 [&_button]:h-12 [&_button]:rounded-xl
+                        [&_button]:bg-black/10 [&_button]:text-donkey-bean
+                        [&_button:hover]:bg-black/20 [&_button]:transition [&_button]:shadow-md">
+                <?= $block->getChildHtml('customer') ?>
+            </div>
+
+            <!-- Cart -->
+            <?php if ($showMiniCart): ?>
+                <button
+            <?php else: ?>
+            <a
+                <?php endif ?>
+                class="relative inline-flex items-center justify-center w-12 h-12 rounded-xl
+                       bg-donkey-sunset text-donkey-bone hover:bg-[#d46f28] transition shadow-md
+                       focus:outline-none focus:ring-2 focus:ring-donkey-bandana"
+                <?php if ($showMiniCart): ?>
+                    @click.prevent="closeMenu(); $dispatch('toggle-cart', { isOpen: true })"
+                <?php else: ?>
+                    href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/index')) ?>"
+                    title="<?= $escaper->escapeHtmlAttr(__('View cart')) ?>"
+                <?php endif ?>>
+                <?= $heroicons->shoppingCartHtml("w-5 h-5", 20, 20, ["aria-hidden" => "true"]) ?>
+                <span x-text="cart.summary_count || '0'"
+                      x-show="cart.summary_count > 0"
+                      x-cloak
+                      class="absolute -top-2 -right-2 h-5 min-w-5 px-1 rounded-full text-[11px] font-bold
+                             bg-black/20 text-donkey-bone border border-donkey-bone/50
+                             flex items-center justify-center"
+                      aria-hidden="true"></span>
+                <?php if ($showMiniCart): ?>
+                    </button>
+                <?php else: ?>
+            </a>
+        <?php endif ?>
+        </div>
+    </div>
+</nav>
+<script>
+    'use strict';
+
+    const initMenuMobile<?= $escaper->escapeHtml($uniqueId) ?> = () => {
+        return {
+            mobilePanelActiveId: null,
+            open: false,
+            cart: {},
+            init() {
+                this.setActiveMenu(this.$root);
+                // Listen for cart data
+                this.$watch('$store.cart', (cart) => {
+                    this.cart = cart || {};
+                });
+            },
+            setActiveMenu(menuNode) {
+                Array.from(menuNode.querySelectorAll('a')).filter(link => {
+                    return link.href === window.location.href.split('?')[0];
+                }).map(item => {
+                    item.classList.add('underline');
+                    item.closest('li.level-0') &&
+                    item.closest('li.level-0').querySelector('a.level-0').classList.add('underline');
+                });
+            },
+            openMenu() {
+                this.open = true
+                this.$nextTick(() => hyva.trapFocus(this.$refs['mobileMenuNavLinks']));
+                // Prevent from body scrolling while mobile menu opened
+                document.body.style.overflow = 'hidden';
+            },
+            closeMenu() {
+                document.body.style.overflow = '';
+
+                if (this.open) {
+                    this.$nextTick(() => this.$refs['mobileMenuTrigger'].focus() || hyva.releaseFocus());
+                }
+
+                this.open = false
+                this.mobilePanelActiveId = null
+            },
+            openSubcategory(index) {
+                const menuNodeRef = document.querySelector('[data-child-id=' + index + ']')
+                this.mobilePanelActiveId = this.mobilePanelActiveId === index ? 0 : index
+                this.$nextTick(() => hyva.trapFocus(menuNodeRef))
+            },
+            backToMainCategories(index) {
+                const menuNodeRef = document.querySelector('[data-child-id=' + index + ']')
+                this.mobilePanelActiveId = 0
+                this.$nextTick(() => {
+                    hyva.trapFocus(this.$refs['mobileMenuNavLinks'])
+                    menuNodeRef.querySelector('a').focus()
+                })
+            }
+        }
+    }
+</script>
