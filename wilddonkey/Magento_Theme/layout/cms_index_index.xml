@@ -7,5 +7,21 @@
                    name="wild_donkey_hero"
                    template="Magento_Theme::html/hero-wild-donkey.phtml"/>
         </referenceContainer>
+
+        <referenceContainer name="content">
+            <!-- Sustainable Sources CMS Block -->
+            <block class="Magento\Cms\Block\Block" name="sustainable_sources_block" after="-">
+                <arguments>
+                    <argument name="block_id" xsi:type="string">sustainable_sources</argument>
+                </arguments>
+            </block>
+
+            <!-- About Us CMS Block -->
+            <block class="Magento\Cms\Block\Block" name="about_us_block" after="sustainable_sources_block">
+                <arguments>
+                    <argument name="block_id" xsi:type="string">about_us</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
     </body>
 </page>
